@@ -132,6 +132,8 @@ def alarm():
                 buzzer.duty(0)
                 led3.off()
                 alarmdelay3 = ticks_ms()
+    blink1()
+    blink2()
 
 # Funktion til at tjekke om MPU er stoppet eller standser
 def is_stopped(accel_data, threshold=0.05):
@@ -300,6 +302,7 @@ while True:
         # Disconnecting from ThingsBoard
         client.disconnect()
         exit()
+
 
 
 
