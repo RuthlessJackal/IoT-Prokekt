@@ -45,36 +45,25 @@ threshold1sec = 1000
 alarmdelay1 = ticks_ms()
 alarmdelay2 = ticks_ms()
 alarmdelay3 = ticks_ms()
-
-#########################################################################
-# CONFIGURATION
-gps_port = 2                                 # ESP32 UART port, Educaboard ESP32 default UART port
-gps_speed = 9600                             # UART speed, defauls u-blox speed
-#########################################################################
-# OBJECTS
-uart = UART(gps_port, gps_speed)             # UART object creation
-gps = GPS_SIMPLE(uart)                      # GPS object creation
-#########################################################################
-
-#Initialisering af I2C objekt
+gps_port = 2                                 
+gps_speed = 9600                             
+uart = UART(gps_port, gps_speed)            
+gps = GPS_SIMPLE(uart)                      
 i2c = I2C(0)
-#Initialisering af mpu6050 objekt
 imu = MPU6050(i2c)
 
-# linær funktion til  batteri status
+
 x1=1670
-#3v
 y1=0
 x2=2440
-#4,2
 y2=100
 
 a = (y2-y1)/(x2-x1)
 b = y2 - a*x2
 
 def formel_batt(x):
-    y= a*x+b # y = 0,159x - 255,962 det er formlen vha. aflæsning af ADC-værdi til at finde en lineær funktion
-    return int(y) #laver vores batteristatus om til integer(hel tal)
+    y= a*x+b 
+    return int(y)
 
 adc = ADC_substitute(34)
 
@@ -119,14 +108,14 @@ sluk_alle(np2)
 
 def alarm():
     buzzer.duty(512)
-    buzzer.freq(440) #a4
-    if ticks_ms() - alarmdelay1 > threshold1sec: #her fungerer sleep funktionen som hvor lang tid den givne tone skal spilles
+    buzzer.freq(440)
+    if ticks_ms() - alarmdelay1 > threshold1sec: 
         buzzer.duty(0)
         led3 .on()
         alarmdelay1 = ticks_ms()
         if ticks_ms() - alarmdelay2 > threshhold3:
             buzzer.duty(512)
-            buzzer.freq(1319)#e6
+            buzzer.freq(1319)
             alarmdelay2 = ticks_ms()
             if ticks_ms() - alarmdelay3 > threshold1sec:
                 buzzer.duty(0)
@@ -135,26 +124,22 @@ def alarm():
     blink1()
     blink2()
 
-# Funktion til at tjekke om MPU er stoppet eller standser
+
 def is_stopped(accel_data, threshold=0.05):
     ax = abs(accel_data['acceleration x']) / 16384  # Normaliseret til g
     ay = abs(accel_data['acceleration y']) / 16384
     az = abs(accel_data['acceleration z']) / 16384
-    # Hvis ændringerne er meget små, antages det at den er stoppet
     return ax
 
 
 
-# handler er funktionen man kalder tilbage til fra thingsboard
+
 def handler(req_id, method, params):
     """handler callback to recieve RPC from server """
-     # handler signature is callback(req_id, method, params)
     print(f'Response {req_id}: {method}, params {params}')
     print(params, "params type:", type(params))
     try:
-        # check if the method is "toggle_led1" (needs to be configured on thingsboard dashboard)
         if method == "toggle_lås":
-            # check if the value is "lås on"
             if params == True:
                 print("lås on")
                 lås.on()
@@ -162,7 +147,6 @@ def handler(req_id, method, params):
                 print("lås off")
                 lås.off()
         if method == "toggle_led2":
-            # check if the value is is "led1 on"
             if params == True:
                 print("led2 on")
                 led2.off()
@@ -170,7 +154,6 @@ def handler(req_id, method, params):
                 print("led2 off")
                 led2.on()
         if method == "arm alarm":
-            # check if the value is is "led1 on"
             if params == True:
                 print("alarm armed")
                 alarmready = True
@@ -187,15 +170,10 @@ def handler(req_id, method, params):
     except TypeError as e:
         print(e)
 
-# see more about ThingsBoard RPC at the documentation:
-# https://thingsboard.io/docs/user-guide/rpc/
-        
-# See examples for more authentication options
-# https://github.com/thingsboard/thingsboard-micropython-client-sdk/
+
 client = TBDeviceMqttClient(secrets.SERVER_IP_ADDRESS, access_token = secrets.ACCESS_TOKEN)
 
 
-# Connecting to ThingsBoard
 client.connect()
 print("connected to thingsboard, starting to send and receive data")
 while True:
@@ -231,23 +209,21 @@ while True:
     lon = gps.get_longitude()
     course = gps.get_course()
     
-    if låsledning == 0:
+    if låsledning.value() == 0:
         alarm()
-    # printer hele dictionary som returneres fra get_values metoden
     values = imu.get_values()
-    #print(values)
-    #print(is_stopped(values))
     kmh = (is_stopped(values) * 9.81) *3.6
-    #print(kmh)
+
 
     if lat1 != lat2 and lon1 != lon2 and alarmready == True:
         alarm()
+        
     temperature = temp.get_temperature()
-    #####
+    
     adc_val = adc.read_adc()
     v = adc.read_voltage()
     batt_percentage = formel_batt(adc_val)
-    ####
+    
     if ticks_ms() - displayupdate > threshhold4:
         lcd.clear()
         lcd.move_to(0,0)
@@ -281,27 +257,22 @@ while True:
         "retning": course,
         "temperature": temperature,
         "batteri procent": batt_percentage
-        }
-        # uncomment for sending telemetry from device to server       
+        }     
         if ticks_ms() - telemetridelay > threshhold5:
         
             client.send_telemetry(telemetry)
             telemetridelay = ticks_ms()
         
-        if ticks_ms() - handlerstart > threshhold: #non blocking delay
-            #callback to get server RPC requests
+        if ticks_ms() - handlerstart > threshhold:
             client.set_server_side_rpc_request_handler(handler) 
-            
-            # Checking for incoming subscriptions or RPC call requests (non-blocking)
             client.check_msg()
             print("tb")
             handlerstart = ticks_ms()
-        #sleep(3)
     except KeyboardInterrupt:
         print("Disconnected!")
-        # Disconnecting from ThingsBoard
         client.disconnect()
         exit()
+
 
 
 
