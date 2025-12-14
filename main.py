@@ -206,17 +206,16 @@ while True:
     if låsledning.value() == 1:
         alarm()
 
+    if lat1 != lat2 and lon1 != lon2 and alarmready == True:
+        alarm()
+
+
     lat = gps.get_latitude()
     lon = gps.get_longitude()
     course = gps.get_course()
 
     values = imu.get_values()
     kmh = (is_stopped(values) * 9.81) *3.6
-
-
-    if lat1 != lat2 and lon1 != lon2 and alarmready == True:
-        alarm()
-        
     temperature = temp.get_temperature()
     
     adc_val = adc.read_adc()
@@ -271,6 +270,7 @@ while True:
         print("Disconnected!")
         client.disconnect()
         exit()
+
 
 
 
