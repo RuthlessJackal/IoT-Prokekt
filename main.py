@@ -203,12 +203,13 @@ while True:
     if knap2val1 == 0 and knap2val2 == 1:
         blink2()
     
+    if låsledning.value() == 1:
+        alarm()
+
     lat = gps.get_latitude()
     lon = gps.get_longitude()
     course = gps.get_course()
-    
-    if låsledning.value() == 0:
-        alarm()
+
     values = imu.get_values()
     kmh = (is_stopped(values) * 9.81) *3.6
 
@@ -270,6 +271,7 @@ while True:
         print("Disconnected!")
         client.disconnect()
         exit()
+
 
 
 
