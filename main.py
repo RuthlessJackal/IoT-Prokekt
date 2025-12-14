@@ -124,7 +124,7 @@ def alarm():
 
 
 def is_stopped(accel_data, threshold=0.05):
-    ax = abs(accel_data['acceleration x']) / 16384  # Normaliseret til g
+    ax = abs(accel_data['acceleration x']) / 16384 
     ay = abs(accel_data['acceleration y']) / 16384
     az = abs(accel_data['acceleration z']) / 16384
     return ax
@@ -270,6 +270,7 @@ while True:
         print("Disconnected!")
         client.disconnect()
         exit()
+
 
 
 
