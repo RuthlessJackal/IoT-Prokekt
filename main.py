@@ -69,20 +69,18 @@ adc = ADC_substitute(34)
 
 
 def blink1():
-    
-        for i in range(10):
-            if ticks_ms() - neopixel1ondelay > threshhold2:
-                for led in range(no_of_pixels):
-                    np1[led] = on_color
-                    np1.write()
-                neopixel1ondelay = ticks_ms()
-                
-            if ticks_ms() - neopixel1offdelay > threshhold3:
-                for led in range(no_of_pixels):
-                    np1[led] = off_color
-                    np1.write()
+    for i in range(10):
+         if ticks_ms() - neopixel1ondelay > threshhold2:
+             for led in range(no_of_pixels):
+                 np1[led] = on_color
+                 np1.write()
+            neopixel1ondelay = ticks_ms()
+        if ticks_ms() - neopixel1offdelay > threshhold3:
+            for led in range(no_of_pixels):
+                np1[led] = off_color
+                np1.write()
                 print("on1")
-                neopixel1offdelay = ticks_ms()
+             neopixel1offdelay = ticks_ms()
 
 def blink2():
     for i in range(10):
@@ -272,6 +270,7 @@ while True:
         print("Disconnected!")
         client.disconnect()
         exit()
+
 
 
 
