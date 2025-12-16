@@ -13,10 +13,10 @@ while True:
     
     if co2 <= 50:
         relæ.on()
-        led.on()
+        led.off()
 
     elif co2 > 50:
         relæ.off()
-        led.off()
+        led.ob()
 
     sleep(5)
