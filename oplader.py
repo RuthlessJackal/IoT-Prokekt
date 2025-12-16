@@ -17,6 +17,6 @@ while True:
 
     elif co2 > 50:
         relæ.off()
-        led.ob()
+        led.on()
 
     sleep(5)
